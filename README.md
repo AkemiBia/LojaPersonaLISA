@@ -1,5 +1,4 @@
-# PersonaLISA - E-commerce de Pelúcias Artesanais
-
+# PersonaLISA - 
 E-commerce completo de pelúcias artesanais desenvolvido em Node.js, inspirado no conceito do PersonaLISA com identidade própria da PersonaLISA.
 
 ## 🎯 Sobre o Projeto
