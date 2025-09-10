@@ -5,9 +5,49 @@ const helmet = require('helmet');
 const cors = require('cors');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
+const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Configuração do Multer para upload de imagens
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = 'public/images/products/';
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    // Gerar nome único: timestamp + nome original (sanitizado)
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = path.extname(file.originalname);
+    const baseName = file.originalname.replace(extension, '').replace(/[^a-zA-Z0-9]/g, '-');
+    cb(null, `${baseName}-${uniqueSuffix}${extension}`);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // Aceitar apenas imagens
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Apenas arquivos de imagem são permitidos!'), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB máximo
+  }
+});
+
+// Disponibilizar upload para routes
+app.locals.upload = upload;
 
 // Middleware de segurança
 app.use(helmet({

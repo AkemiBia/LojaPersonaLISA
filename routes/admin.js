@@ -147,7 +147,11 @@ router.get('/produtos/novo', requireAdmin, async (req, res) => {
 });
 
 // Salvar produto
-router.post('/produtos', requireAdmin, async (req, res) => {
+router.post('/produtos', requireAdmin, (req, res, next) => {
+  // Usar multer para upload de imagens
+  const upload = req.app.locals.upload;
+  upload.array('product_images', 10)(req, res, next);
+}, async (req, res) => {
   try {
     const {
       name, slug, description, price, compare_price,
@@ -184,6 +188,34 @@ router.post('/produtos', requireAdmin, async (req, res) => {
       }
     }
 
+    // Processar imagens uploaded
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const isFirstImage = i === 0; // Primeira imagem é a principal
+        
+        await db.run(`
+          INSERT INTO product_images 
+          (product_id, filename, alt_text, sort_order, is_primary)
+          VALUES (?, ?, ?, ?, ?)
+        `, [
+          productId, 
+          file.filename, 
+          name, // Usar o nome do produto como alt_text padrão
+          i, 
+          isFirstImage
+        ]);
+
+        // Se é a primeira imagem, atualizar o campo image do produto para compatibilidade
+        if (isFirstImage) {
+          await db.run(
+            'UPDATE products SET image = ? WHERE id = ?',
+            [file.filename, productId]
+          );
+        }
+      }
+    }
+
     res.redirect('/admin/produtos');
 
   } catch (error) {
@@ -217,6 +249,15 @@ router.get('/produtos/:id/editar', requireAdmin, async (req, res) => {
 
     const selectedCategories = productCategories.map(pc => pc.category_id);
 
+    // Buscar imagens do produto
+    const productImages = await db.all(
+      'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, is_primary DESC',
+      [productId]
+    );
+
+    // Adicionar imagens ao produto
+    product.images = productImages;
+
     // Renderizar diretamente sem layout
     const templatePath = path.join(__dirname, '../views/admin/products/form.ejs');
     const html = await ejs.renderFile(templatePath, {
@@ -240,7 +281,11 @@ router.get('/produtos/:id/editar', requireAdmin, async (req, res) => {
 });
 
 // Atualizar produto
-router.post('/produtos/:id', requireAdmin, async (req, res) => {
+router.post('/produtos/:id', requireAdmin, (req, res, next) => {
+  // Usar multer para upload de novas imagens
+  const upload = req.app.locals.upload;
+  upload.array('product_images', 10)(req, res, next);
+}, async (req, res) => {
   try {
     const productId = req.params.id;
     const {
@@ -279,6 +324,68 @@ router.post('/produtos/:id', requireAdmin, async (req, res) => {
           'INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)',
           [productId, categoryId]
         );
+      }
+    }
+
+    // Processar alt texts das imagens existentes
+    if (req.body.image_alt) {
+      for (const [imageId, altText] of Object.entries(req.body.image_alt)) {
+        await db.run(
+          'UPDATE product_images SET alt_text = ? WHERE id = ?',
+          [altText, imageId]
+        );
+      }
+    }
+
+    // Processar novas imagens uploaded
+    if (req.files && req.files.length > 0) {
+      // Obter a próxima ordem de classificação
+      const maxSort = await db.get(
+        'SELECT MAX(sort_order) as max_sort FROM product_images WHERE product_id = ?',
+        [productId]
+      );
+      let nextSortOrder = (maxSort && maxSort.max_sort !== null) ? maxSort.max_sort + 1 : 0;
+
+      for (const file of req.files) {
+        await db.run(`
+          INSERT INTO product_images 
+          (product_id, filename, alt_text, sort_order, is_primary)
+          VALUES (?, ?, ?, ?, ?)
+        `, [
+          productId, 
+          file.filename, 
+          name, // Usar o nome do produto como alt_text padrão
+          nextSortOrder,
+          false // Novas imagens não são principais por padrão
+        ]);
+
+        nextSortOrder++;
+      }
+
+      // Se não há imagem principal, fazer a primeira nova imagem como principal
+      const hasPrimary = await db.get(
+        'SELECT COUNT(*) as count FROM product_images WHERE product_id = ? AND is_primary = 1',
+        [productId]
+      );
+
+      if (hasPrimary.count === 0) {
+        const firstImage = await db.get(
+          'SELECT id, filename FROM product_images WHERE product_id = ? ORDER BY sort_order ASC LIMIT 1',
+          [productId]
+        );
+
+        if (firstImage) {
+          await db.run(
+            'UPDATE product_images SET is_primary = 1 WHERE id = ?',
+            [firstImage.id]
+          );
+
+          // Atualizar campo image do produto para compatibilidade
+          await db.run(
+            'UPDATE products SET image = ? WHERE id = ?',
+            [firstImage.filename, productId]
+          );
+        }
       }
     }
 
@@ -615,6 +722,91 @@ router.post('/categorias/:id/deletar', requireAdmin, async (req, res) => {
     console.error('Erro ao deletar categoria:', error);
     req.session.error = 'Erro ao deletar categoria.';
     res.redirect('/admin/categorias');
+  }
+});
+
+// ========== ROTAS DE GERENCIAMENTO DE IMAGENS ==========
+
+// Deletar imagem do produto
+router.delete('/produtos/imagens/:id', requireAdmin, async (req, res) => {
+  try {
+    const imageId = req.params.id;
+    const db = getDatabase();
+    const fs = require('fs');
+    const path = require('path');
+
+    // Buscar informações da imagem
+    const image = await db.get('SELECT * FROM product_images WHERE id = ?', [imageId]);
+    
+    if (!image) {
+      return res.status(404).json({ success: false, message: 'Imagem não encontrada' });
+    }
+
+    // Deletar arquivo físico
+    const imagePath = path.join(__dirname, '../public/images/products/', image.filename);
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+    }
+
+    // Deletar do banco de dados
+    await db.run('DELETE FROM product_images WHERE id = ?', [imageId]);
+
+    // Se era a imagem principal, definir outra como principal
+    if (image.is_primary) {
+      const nextPrimary = await db.get(
+        'SELECT id, filename FROM product_images WHERE product_id = ? ORDER BY sort_order ASC LIMIT 1',
+        [image.product_id]
+      );
+
+      if (nextPrimary) {
+        await db.run('UPDATE product_images SET is_primary = 1 WHERE id = ?', [nextPrimary.id]);
+        
+        // Atualizar campo image do produto
+        await db.run('UPDATE products SET image = ? WHERE id = ?', [nextPrimary.filename, image.product_id]);
+      } else {
+        // Não há mais imagens, limpar campo image do produto
+        await db.run('UPDATE products SET image = NULL WHERE id = ?', [image.product_id]);
+      }
+    }
+
+    res.json({ success: true, message: 'Imagem removida com sucesso' });
+
+  } catch (error) {
+    console.error('Erro ao deletar imagem:', error);
+    res.status(500).json({ success: false, message: 'Erro interno do servidor' });
+  }
+});
+
+// Definir imagem como principal
+router.put('/produtos/imagens/:id/primary', requireAdmin, async (req, res) => {
+  try {
+    const imageId = req.params.id;
+    const db = getDatabase();
+
+    // Buscar informações da imagem
+    const image = await db.get('SELECT * FROM product_images WHERE id = ?', [imageId]);
+    
+    if (!image) {
+      return res.status(404).json({ success: false, message: 'Imagem não encontrada' });
+    }
+
+    // Remover status de principal de todas as imagens do produto
+    await db.run(
+      'UPDATE product_images SET is_primary = 0 WHERE product_id = ?',
+      [image.product_id]
+    );
+
+    // Definir esta imagem como principal
+    await db.run('UPDATE product_images SET is_primary = 1 WHERE id = ?', [imageId]);
+
+    // Atualizar campo image do produto para compatibilidade
+    await db.run('UPDATE products SET image = ? WHERE id = ?', [image.filename, image.product_id]);
+
+    res.json({ success: true, message: 'Imagem definida como principal' });
+
+  } catch (error) {
+    console.error('Erro ao definir imagem principal:', error);
+    res.status(500).json({ success: false, message: 'Erro interno do servidor' });
   }
 });
 

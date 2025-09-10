@@ -145,13 +145,30 @@ router.get('/:slug', async (req, res) => {
       });
     }
 
-    // Buscar imagens do produto (simulado - usando campo image da tabela products)
-    const images = [{ 
-      id: 1, 
-      filename: product.image || '/images/products/placeholder.jpg',
-      is_primary: true,
-      alt_text: product.name 
-    }];
+    // Buscar imagens do produto
+    let images = await db.all(`
+      SELECT * FROM product_images 
+      WHERE product_id = ? 
+      ORDER BY is_primary DESC, sort_order ASC
+    `, [product.id]);
+
+    // Se não há imagens na tabela product_images, usar campo image do produto como fallback
+    if (images.length === 0 && product.image) {
+      images = [{ 
+        id: null, 
+        filename: product.image,
+        is_primary: true,
+        alt_text: product.name 
+      }];
+    } else if (images.length === 0) {
+      // Placeholder se não há nenhuma imagem
+      images = [{ 
+        id: null, 
+        filename: 'placeholder.svg',
+        is_primary: true,
+        alt_text: product.name 
+      }];
+    }
 
     // Buscar variações do produto
     const variants = await db.all(`
