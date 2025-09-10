@@ -1,0 +1,447 @@
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Início</a></li>
+            <li class="breadcrumb-item"><a href="/produtos">Produtos</a></li>
+            <% if (categories && categories.length > 0) { %>
+                <li class="breadcrumb-item">
+                    <a href="/produtos?categoria=<%= categories[0].slug %>">
+                        <%= categories[0].name %>
+                    </a>
+                </li>
+            <% } %>
+            <li class="breadcrumb-item active"><%= product.name %></li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-lg-6 mb-4">
+            <div class="product-gallery">
+                <% if (images && images.length > 0) { %>
+                    <!-- Main Image -->
+                    <div class="main-image mb-3">
+                        <img src="/images/products/<%= images[0].filename %>" 
+                             alt="<%= images[0].alt_text || product.name %>" 
+                             class="img-fluid rounded shadow"
+                             id="mainProductImage">
+                    </div>
+
+                    <!-- Thumbnail Images -->
+                    <% if (images.length > 1) { %>
+                        <div class="image-thumbnails">
+                            <div class="row g-2">
+                                <% images.forEach((image, index) => { %>
+                                    <div class="col-3">
+                                        <img src="/images/products/<%= image.filename %>" 
+                                             alt="<%= image.alt_text || product.name %>" 
+                                             class="img-fluid rounded thumbnail <%= index === 0 ? 'active' : '' %>"
+                                             onclick="changeMainImage('<%= image.filename %>', this)">
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <!-- Placeholder Image -->
+                    <div class="main-image mb-3">
+                        <div class="img-placeholder rounded shadow d-flex align-items-center justify-content-center">
+                            <i class="fas fa-image fa-4x text-muted"></i>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-lg-6">
+            <div class="product-info">
+                <!-- Product Title -->
+                <h1 class="product-title mb-2"><%= product.name %></h1>
+
+                <!-- Product Categories -->
+                <% if (categories && categories.length > 0) { %>
+                    <div class="product-categories mb-3">
+                        <% categories.forEach(category => { %>
+                            <a href="/produtos?categoria=<%= category.slug %>" class="badge bg-light text-dark me-1">
+                                <%= category.name %>
+                            </a>
+                        <% }) %>
+                    </div>
+                <% } %>
+
+                <!-- Stock Status -->
+                <div class="stock-status mb-3">
+                    <% if (product.stock > 0) { %>
+                        <span class="badge bg-success">
+                            <i class="fas fa-check-circle me-1"></i>
+                            <%= product.stock %> em estoque
+                        </span>
+                        <% if (product.stock <= 3) { %>
+                            <span class="badge bg-warning text-dark ms-1">
+                                <%= product.stock === 1 ? 'Última peça!' : 'Poucas unidades!' %>
+                            </span>
+                        <% } %>
+                    <% } else { %>
+                        <span class="badge bg-danger">
+                            <i class="fas fa-times-circle me-1"></i>
+                            Esgotado
+                        </span>
+                    <% } %>
+                </div>
+
+                <!-- Price -->
+                <div class="product-price mb-4">
+                    <% if (product.compare_price && product.compare_price > product.price) { %>
+                        <div class="price-with-discount">
+                            <span class="current-price">R$ <%= parseFloat(product.price).toFixed(2).replace('.', ',') %></span>
+                            <span class="original-price ms-2">R$ <%= parseFloat(product.compare_price).toFixed(2).replace('.', ',') %></span>
+                            <span class="discount-badge ms-2">-<%= product.discount_percent %>% OFF</span>
+                        </div>
+                    <% } else { %>
+                        <div class="price-simple">
+                            <% if (product.price == 0) { %>
+                                <span class="current-price text-success">Grátis</span>
+                            <% } else { %>
+                                <span class="current-price">R$ <%= parseFloat(product.price).toFixed(2).replace('.', ',') %></span>
+                            <% } %>
+                        </div>
+                    <% } %>
+
+                    <% if (product.price > 0 && product.price >= 30) { %>
+                        <div class="installments mt-2">
+                            <small class="text-muted">
+                                ou até 6x de R$ <%= (parseFloat(product.price) / 6).toFixed(2).replace('.', ',') %> sem juros
+                            </small>
+                        </div>
+                    <% } %>
+
+                    <% if (product.price > 0) { %>
+                        <div class="pix-discount mt-2">
+                            <small class="text-success">
+                                <i class="fas fa-mobile-alt me-1"></i>
+                                2% de desconto pagando com PIX: R$ <%= (parseFloat(product.price) * 0.98).toFixed(2).replace('.', ',') %>
+                            </small>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Product Variants -->
+                <% if (Object.keys(variantGroups).length > 0) { %>
+                    <div class="product-variants mb-4">
+                        <% Object.keys(variantGroups).forEach(variantType => { %>
+                            <div class="variant-group mb-3">
+                                <label class="form-label fw-bold"><%= variantType %>:</label>
+                                <div class="variant-options">
+                                    <% variantGroups[variantType].forEach((variant, index) => { %>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" 
+                                                   name="variant_<%= variantType %>" 
+                                                   id="variant_<%= variant.id %>" 
+                                                   value="<%= variant.id %>"
+                                                   <%= index === 0 ? 'checked' : '' %>>
+                                            <label class="form-check-label variant-label" for="variant_<%= variant.id %>">
+                                                <%= variant.value %>
+                                            </label>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+
+                <!-- Quantity and Add to Cart -->
+                <% if (product.stock > 0) { %>
+                    <div class="purchase-options mb-4">
+                        <div class="row align-items-end">
+                            <div class="col-md-4 mb-2">
+                                <label for="quantity" class="form-label">Quantidade:</label>
+                                <div class="input-group">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" class="form-control text-center" 
+                                           id="quantity" value="1" min="1" max="<%= product.stock %>">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-8 mb-2">
+                                <div class="d-grid">
+                                    <button class="btn btn-primary btn-lg add-to-cart" 
+                                            data-product-id="<%= product.id %>"
+                                            data-product-name="<%= product.name %>">
+                                        <i class="fas fa-cart-plus me-2"></i>
+                                        Adicionar ao Carrinho
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="out-of-stock-notice mb-4">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Produto esgotado</strong><br>
+                            Este produto está temporariamente indisponível.
+                        </div>
+                    </div>
+                <% } %>
+
+                <!-- Product Description -->
+                <% if (product.description) { %>
+                    <div class="product-description">
+                        <h5>Descrição</h5>
+                        <div class="description-content">
+                            <%= product.description %>
+                        </div>
+                    </div>
+                <% } %>
+
+                <!-- Additional Info -->
+                <div class="product-info-tabs mt-4">
+                    <div class="accordion" id="productInfoAccordion">
+                        <!-- Shipping Info -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="shippingHeading">
+                                <button class="accordion-button collapsed" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#shippingCollapse">
+                                    <i class="fas fa-shipping-fast me-2"></i>
+                                    Informações de Entrega
+                                </button>
+                            </h2>
+                            <div id="shippingCollapse" class="accordion-collapse collapse" 
+                                 data-bs-parent="#productInfoAccordion">
+                                <div class="accordion-body">
+                                    <ul class="list-unstyled mb-0">
+                                        <li><i class="fas fa-truck me-2 text-primary"></i>Entrega para todo o Brasil</li>
+                                        <li><i class="fas fa-box me-2 text-primary"></i>Produtos em estoque: 2-3 dias úteis</li>
+                                        <li><i class="fas fa-tools me-2 text-primary"></i>Produtos sob encomenda: 7-15 dias úteis</li>
+                                        <li><i class="fas fa-gift me-2 text-primary"></i>Frete grátis comprando 2 ou mais produtos</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="detailsHeading">
+                                <button class="accordion-button collapsed" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#detailsCollapse">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Detalhes do Produto
+                                </button>
+                            </h2>
+                            <div id="detailsCollapse" class="accordion-collapse collapse" 
+                                 data-bs-parent="#productInfoAccordion">
+                                <div class="accordion-body">
+                                    <dl class="row mb-0">
+                                        <% if (product.sku) { %>
+                                            <dt class="col-sm-4">SKU:</dt>
+                                            <dd class="col-sm-8"><%= product.sku %></dd>
+                                        <% } %>
+                                        <% if (product.weight) { %>
+                                            <dt class="col-sm-4">Peso:</dt>
+                                            <dd class="col-sm-8"><%= product.weight %>kg</dd>
+                                        <% } %>
+                                        <dt class="col-sm-4">Material:</dt>
+                                        <dd class="col-sm-8">Pelúcia de alta qualidade</dd>
+                                        <dt class="col-sm-4">Cuidados:</dt>
+                                        <dd class="col-sm-8">Lavar à mão com água fria</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+        <div class="related-products mt-5">
+            <h3 class="mb-4">Produtos Relacionados</h3>
+            <div class="row">
+                <% relatedProducts.forEach(relatedProduct => { %>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <%- include('../partials/product-card', { product: relatedProduct }) %>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<script>
+// Image gallery
+function changeMainImage(filename, thumbnail) {
+    document.getElementById('mainProductImage').src = '/images/products/' + filename;
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    thumbnail.classList.add('active');
+}
+
+// Quantity controls
+function changeQuantity(change) {
+    const quantityInput = document.getElementById('quantity');
+    const currentValue = parseInt(quantityInput.value);
+    const newValue = currentValue + change;
+    const maxStock = parseInt(quantityInput.max);
+    
+    if (newValue >= 1 && newValue <= maxStock) {
+        quantityInput.value = newValue;
+    }
+}
+
+// Add to cart with variants
+document.querySelector('.add-to-cart').addEventListener('click', function(e) {
+    const productId = this.dataset.productId;
+    const productName = this.dataset.productName;
+    const quantity = document.getElementById('quantity').value;
+    
+    // Get selected variant if any
+    let variantId = null;
+    const variantInputs = document.querySelectorAll('input[name^="variant_"]:checked');
+    if (variantInputs.length > 0) {
+        variantId = variantInputs[0].value;
+    }
+    
+    // Call add to cart function from main app.js
+    if (typeof handleAddToCart === 'function') {
+        const event = {
+            target: {
+                closest: () => this,
+                dataset: { productId, productName }
+            }
+        };
+        
+        // Override quantity
+        const originalQuantity = document.querySelector('#quantity-' + productId);
+        if (!originalQuantity) {
+            const tempInput = document.createElement('input');
+            tempInput.id = 'quantity-' + productId;
+            tempInput.value = quantity;
+            document.body.appendChild(tempInput);
+        } else {
+            originalQuantity.value = quantity;
+        }
+        
+        // Override variant
+        if (variantId) {
+            const tempSelect = document.createElement('select');
+            tempSelect.id = 'variant-' + productId;
+            tempSelect.value = variantId;
+            document.body.appendChild(tempSelect);
+        }
+        
+        handleAddToCart(event);
+    }
+});
+
+// Form validation for quantity
+document.getElementById('quantity').addEventListener('change', function() {
+    const value = parseInt(this.value);
+    const max = parseInt(this.max);
+    
+    if (value < 1) {
+        this.value = 1;
+    } else if (value > max) {
+        this.value = max;
+        showAlert(`Apenas ${max} unidades disponíveis em estoque`, 'warning');
+    }
+});
+</script>
+
+<style>
+.product-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.current-price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.original-price {
+    font-size: 1.2rem;
+    text-decoration: line-through;
+    color: #6c757d;
+}
+
+.discount-badge {
+    background: var(--gradient-purple);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.img-placeholder {
+    width: 100%;
+    height: 400px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+}
+
+.thumbnail {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.thumbnail:hover,
+.thumbnail.active {
+    opacity: 1;
+    border-color: var(--primary-color);
+}
+
+.variant-label {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: var(--border-radius);
+    margin-right: 0.5rem;
+    transition: var(--transition);
+}
+
+.form-check-input:checked + .variant-label {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.accordion-button {
+    font-weight: 500;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(111, 66, 193, 0.1);
+    color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .product-title {
+        font-size: 1.5rem;
+    }
+    
+    .current-price {
+        font-size: 1.5rem;
+    }
+    
+    .img-placeholder {
+        height: 250px;
+    }
+}
+</style>

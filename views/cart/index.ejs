@@ -1,0 +1,332 @@
+
+<div class="container my-5">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Início</a></li>
+                    <li class="breadcrumb-item active">Carrinho</li>
+                </ol>
+            </nav>
+            
+            <h1 class="mb-0">
+                <i class="fas fa-shopping-cart me-2"></i>
+                Carrinho de compras
+            </h1>
+        </div>
+    </div>
+
+    <% if (isEmpty) { %>
+        <!-- Empty Cart -->
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+                    <h3>O carrinho de compras está vazio.</h3>
+                    <p class="text-muted mb-4">Que tal adicionar alguns produtos fofos?</p>
+                    <a href="/produtos" class="btn btn-primary btn-lg">
+                        <i class="fas fa-arrow-left me-2"></i>Ver produtos
+                    </a>
+                </div>
+                
+                <div class="row mt-5">
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-truck fa-2x text-primary mb-3"></i>
+                                <h5>Frete grátis</h5>
+                                <p class="text-muted mb-0">Comprando 2 ou mais produtos</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-credit-card fa-2x text-primary mb-3"></i>
+                                <h5>Pagamento seguro</h5>
+                                <p class="text-muted mb-0">PIX, cartão ou boleto</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+        <!-- Cart Items -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Itens no carrinho</h5>
+                        <form action="/carrinho/limpar" method="POST" class="d-inline" 
+                              onsubmit="return confirm('Deseja limpar todo o carrinho?')">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash me-1"></i>Limpar carrinho
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card-body p-0">
+                        <% cart.forEach(item => { %>
+                            <div class="cart-item border-bottom p-4" data-product-id="<%= item.productId %>" 
+                                 data-variant-id="<%= item.variantId || '' %>">
+                                <div class="row align-items-center">
+                                    <!-- Product Image -->
+                                    <div class="col-md-2 col-3">
+                                        <% if (item.image) { %>
+                                            <img src="/images/products/<%= item.image %>" 
+                                                 alt="<%= item.product.name %>" 
+                                                 class="img-fluid rounded">
+                                        <% } else { %>
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 80px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <!-- Product Info -->
+                                    <div class="col-md-4 col-9">
+                                        <h6 class="mb-1">
+                                            <a href="/produtos/<%= item.product.slug %>" class="text-decoration-none">
+                                                <%= item.product.name %>
+                                            </a>
+                                        </h6>
+                                        <% if (item.variant) { %>
+                                            <small class="text-muted">
+                                                <%= item.variant.name %>: <%= item.variant.value %>
+                                            </small>
+                                        <% } %>
+                                        <% if (item.product.stock <= 5) { %>
+                                            <div class="mt-1">
+                                                <span class="badge bg-warning text-dark">
+                                                    <%= item.product.stock <= 1 ? 'Última peça!' : `${item.product.stock} restantes` %>
+                                                </span>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <!-- Quantity -->
+                                    <div class="col-md-2 col-4">
+                                        <div class="input-group input-group-sm">
+                                            <button class="btn btn-outline-secondary" type="button" 
+                                                    onclick="updateQuantity(<%= item.productId %>, <%= item.variantId || 'null' %>, -1)">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" class="form-control text-center quantity-input" 
+                                                   value="<%= item.quantity %>" min="1" 
+                                                   data-product-id="<%= item.productId %>"
+                                                   data-variant-id="<%= item.variantId || '' %>">
+                                            <button class="btn btn-outline-secondary" type="button" 
+                                                    onclick="updateQuantity(<%= item.productId %>, <%= item.variantId || 'null' %>, 1)">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Price -->
+                                    <div class="col-md-2 col-4">
+                                        <div class="text-end">
+                                            <strong>R$ <%= parseFloat(item.price).toFixed(2).replace('.', ',') %></strong>
+                                            <div class="small text-muted">
+                                                Total: R$ <%= parseFloat(item.total).toFixed(2).replace('.', ',') %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Remove -->
+                                    <div class="col-md-2 col-4">
+                                        <div class="text-end">
+                                            <button class="btn btn-outline-danger btn-sm remove-from-cart" 
+                                                    data-product-id="<%= item.productId %>"
+                                                    data-variant-id="<%= item.variantId || '' %>"
+                                                    title="Remover item">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+                
+                <!-- Continue Shopping -->
+                <a href="/produtos" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Continuar comprando
+                </a>
+            </div>
+            
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Resumo do pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Subtotal -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal (<%= cart.length %> <%= cart.length === 1 ? 'produto' : 'produtos' %>):</span>
+                            <strong>R$ <%= subtotal %></strong>
+                        </div>
+                        
+                        <!-- Shipping Calculator -->
+                        <div class="border-top pt-3 mb-3">
+                            <h6>Calcular frete</h6>
+                            <form id="shippingCalculator" class="mb-3">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="cep" name="cep" 
+                                           placeholder="00000-000" maxlength="9" required>
+                                    <button type="submit" class="btn btn-outline-primary">
+                                        Calcular
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <!-- Shipping Options -->
+                            <div id="shippingOptions" style="display: none;">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                            
+                            <!-- Selected Shipping -->
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Frete (<%= selectedShipping.name %>):</span>
+                                <span>
+                                    <% if (selectedShipping.price === 0) { %>
+                                        <span class="text-success">Grátis</span>
+                                    <% } else { %>
+                                        R$ <%= parseFloat(selectedShipping.price).toFixed(2).replace('.', ',') %>
+                                    <% } %>
+                                </span>
+                            </div>
+                            <small class="text-muted"><%= selectedShipping.days %></small>
+                        </div>
+                        
+                        <!-- Total -->
+                        <div class="border-top pt-3">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5>Total:</h5>
+                                <h5 class="text-primary">R$ <%= total %></h5>
+                            </div>
+                            
+                            <!-- Payment Options -->
+                            <div class="mb-3">
+                                <small class="text-success d-block">
+                                    <i class="fas fa-mobile-alt me-1"></i>
+                                    2% de desconto pagando com PIX
+                                </small>
+                                <small class="text-muted d-block">
+                                    Ou até 6x de R$ <%= (parseFloat(total) / 6).toFixed(2).replace('.', ',') %> sem juros
+                                </small>
+                            </div>
+                            
+                            <!-- Checkout Button -->
+                            <% if (user) { %>
+                                <a href="/checkout" class="btn btn-primary btn-lg w-100 mb-2">
+                                    <i class="fas fa-credit-card me-2"></i>Finalizar compra
+                                </a>
+                            <% } else { %>
+                                <a href="/auth/login?returnTo=/checkout" class="btn btn-primary btn-lg w-100 mb-2">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login para finalizar
+                                </a>
+                                <div class="text-center">
+                                    <small class="text-muted">
+                                        Não tem conta? 
+                                        <a href="/auth/cadastro">Cadastre-se grátis</a>
+                                    </small>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Trust Badges -->
+                <div class="card mt-4 border-0 bg-light">
+                    <div class="card-body text-center">
+                        <div class="row">
+                            <div class="col-4">
+                                <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                                <small class="d-block">Compra segura</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-truck fa-2x text-primary mb-2"></i>
+                                <small class="d-block">Envio rápido</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                                <small class="d-block">Feito com amor</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<script>
+function updateQuantity(productId, variantId, change) {
+    const input = document.querySelector(`input[data-product-id="${productId}"][data-variant-id="${variantId || ''}"]`);
+    if (!input) return;
+    
+    const currentValue = parseInt(input.value);
+    const newValue = Math.max(1, currentValue + change);
+    input.value = newValue;
+    
+    // Trigger change event
+    input.dispatchEvent(new Event('change'));
+}
+
+// Format CEP input
+document.getElementById('cep')?.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 5) {
+        value = value.substring(0, 5) + '-' + value.substring(5, 8);
+    }
+    e.target.value = value;
+});
+</script>
+
+<style>
+.cart-item:last-child {
+    border-bottom: none !important;
+}
+
+.cart-item .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.cart-item .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.quantity-input {
+    max-width: 70px;
+}
+
+.shipping-option {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shipping-option:hover {
+    background-color: #f8f9fa;
+}
+
+.shipping-option input:checked + label {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .cart-item .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .cart-item .col-md-2:last-child,
+    .cart-item .col-md-2:nth-last-child(2) {
+        text-align: left !important;
+    }
+}
+</style>

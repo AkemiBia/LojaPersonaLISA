@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Admin - PersonaLISA' %></title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-sidebar .nav-link:hover,
+        .admin-sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .admin-content {
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .form-switch .form-check-input {
+            width: 2em;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="admin-sidebar p-3">
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <h4 class="text-white fw-bold">
+                            <i class="fas fa-crown me-2"></i>
+                            PersonaLISA
+                        </h4>
+                        <small class="text-white-50">Painel Administrativo</small>
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="text-center mb-4 p-3 bg-white bg-opacity-10 rounded">
+                        <div class="mb-2">
+                            <i class="fas fa-user-circle fa-3x text-white"></i>
+                        </div>
+                        <h6 class="text-white mb-1"><%= user ? user.name : 'Administrador' %></h6>
+                        <small class="text-white-50">Administrador</small>
+                    </div>
+
+                    <!-- Navigation -->
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="/admin">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        <a class="nav-link" href="/admin/produtos">
+                            <i class="fas fa-box me-2"></i>
+                            Produtos
+                        </a>
+                        <a class="nav-link" href="/admin/pedidos">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Pedidos
+                        </a>
+                        <a class="nav-link active" href="#" data-bs-toggle="collapse" data-bs-target="#categoriesMenu">
+                            <i class="fas fa-tags me-2"></i>
+                            Categorias
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse show" id="categoriesMenu">
+                            <a class="nav-link ps-4" href="/admin/categorias">
+                                <i class="fas fa-list me-2"></i>
+                                Listar
+                            </a>
+                            <a class="nav-link ps-4 active" href="/admin/categorias/nova">
+                                <i class="fas fa-plus me-2"></i>
+                                Nova Categoria
+                            </a>
+                        </div>
+                        
+                        <hr class="text-white-50 my-3">
+                        
+                        <a class="nav-link" href="/" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Ver Site
+                        </a>
+                        <a class="nav-link" href="/auth/perfil">
+                            <i class="fas fa-user me-2"></i>
+                            Meu Perfil
+                        </a>
+                        
+                        <div class="mt-4">
+                            <form action="/auth/logout" method="POST">
+                                <button type="submit" class="nav-link btn btn-link text-start w-100 border-0 p-0">
+                                    <i class="fas fa-sign-out-alt me-2"></i>
+                                    Sair
+                                </button>
+                            </form>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 px-0">
+                <div class="admin-content p-4">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="text-dark mb-0">
+                                <%= isEdit ? 'Editar Categoria' : 'Nova Categoria' %>
+                            </h2>
+                            <small class="text-muted">
+                                <%= isEdit ? `Editando: ${category.name}` : 'Criar uma nova categoria de produtos' %>
+                            </small>
+                        </div>
+                        <a href="/admin/categorias" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Voltar para Lista
+                        </a>
+                    </div>
+
+                    <!-- Category Form -->
+                    <form action="<%= isEdit ? `/admin/categorias/${category.id}` : '/admin/categorias' %>" 
+                          method="POST" 
+                          class="needs-validation" 
+                          novalidate>
+                        
+                        <div class="row">
+                            <!-- Main Category Information -->
+                            <div class="col-lg-8">
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Informações da Categoria
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Category Name -->
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Nome da Categoria *</label>
+                                            <input type="text" class="form-control" id="name" name="name" 
+                                                   value="<%= isEdit ? category.name : '' %>" 
+                                                   required>
+                                            <div class="invalid-feedback">
+                                                O nome da categoria é obrigatório
+                                            </div>
+                                        </div>
+
+                                        <!-- Slug -->
+                                        <div class="mb-3">
+                                            <label for="slug" class="form-label">URL Amigável (Slug) *</label>
+                                            <input type="text" class="form-control" id="slug" name="slug" 
+                                                   value="<%= isEdit ? category.slug : '' %>" 
+                                                   required>
+                                            <div class="form-text">Usado na URL da categoria. Ex: pelucias-anime</div>
+                                            <div class="invalid-feedback">
+                                                O slug é obrigatório
+                                            </div>
+                                        </div>
+
+                                        <!-- Description -->
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Descrição</label>
+                                            <textarea class="form-control" id="description" name="description" 
+                                                      rows="4" placeholder="Descreva a categoria..."><%= isEdit ? (category.description || '') : '' %></textarea>
+                                            <div class="form-text">Descrição que aparecerá na página da categoria</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sidebar -->
+                            <div class="col-lg-4">
+                                <!-- Category Status -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-toggle-on me-2"></i>
+                                            Status da Categoria
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="active" name="active" 
+                                                   <%= isEdit ? (category.active ? 'checked' : '') : 'checked' %>>
+                                            <label class="form-check-label" for="active">
+                                                Categoria Ativa
+                                            </label>
+                                            <div class="form-text">Categorias inativas não aparecem no site</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i>
+                                                <%= isEdit ? 'Atualizar Categoria' : 'Criar Categoria' %>
+                                            </button>
+                                            
+                                            <% if (isEdit) { %>
+                                                <a href="/produtos?categoria=<%= category.slug %>" target="_blank" class="btn btn-outline-info">
+                                                    <i class="fas fa-external-link-alt me-2"></i>
+                                                    Ver no Site
+                                                </a>
+                                            <% } %>
+                                            
+                                            <a href="/admin/categorias" class="btn btn-outline-secondary">
+                                                <i class="fas fa-times me-2"></i>
+                                                Cancelar
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-generate slug from name
+        document.getElementById('name').addEventListener('input', function() {
+            const name = this.value;
+            const slug = name
+                .toLowerCase()
+                .replace(/[áàâãä]/g, 'a')
+                .replace(/[éèêë]/g, 'e')
+                .replace(/[íìîï]/g, 'i')
+                .replace(/[óòôõö]/g, 'o')
+                .replace(/[úùûü]/g, 'u')
+                .replace(/[ç]/g, 'c')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim('-');
+            
+            if (!document.getElementById('slug').value || document.getElementById('slug').dataset.autoGenerated) {
+                document.getElementById('slug').value = slug;
+                document.getElementById('slug').dataset.autoGenerated = 'true';
+            }
+        });
+
+        // Mark slug as manually edited
+        document.getElementById('slug').addEventListener('input', function() {
+            if (this.value !== this.defaultValue) {
+                delete this.dataset.autoGenerated;
+            }
+        });
+
+        // Form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                const forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+</body>
+</html>

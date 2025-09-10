@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Admin - PersonaLISA' %></title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-sidebar .nav-link:hover,
+        .admin-sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .admin-content {
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+        
+        .badge {
+            font-size: 0.75em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="admin-sidebar p-3">
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <h4 class="text-white fw-bold">
+                            <i class="fas fa-crown me-2"></i>
+                            PersonaLISA
+                        </h4>
+                        <small class="text-white-50">Painel Administrativo</small>
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="text-center mb-4 p-3 bg-white bg-opacity-10 rounded">
+                        <div class="mb-2">
+                            <i class="fas fa-user-circle fa-3x text-white"></i>
+                        </div>
+                        <h6 class="text-white mb-1"><%= user ? user.name : 'Administrador' %></h6>
+                        <small class="text-white-50">Administrador</small>
+                    </div>
+
+                    <!-- Navigation -->
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="/admin">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        <a class="nav-link" href="/admin/produtos">
+                            <i class="fas fa-box me-2"></i>
+                            Produtos
+                        </a>
+                        <a class="nav-link" href="/admin/pedidos">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Pedidos
+                        </a>
+                        <a class="nav-link active" href="#" data-bs-toggle="collapse" data-bs-target="#categoriesMenu">
+                            <i class="fas fa-tags me-2"></i>
+                            Categorias
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse show" id="categoriesMenu">
+                            <a class="nav-link ps-4 active" href="/admin/categorias">
+                                <i class="fas fa-list me-2"></i>
+                                Listar
+                            </a>
+                            <a class="nav-link ps-4" href="/admin/categorias/nova">
+                                <i class="fas fa-plus me-2"></i>
+                                Nova Categoria
+                            </a>
+                        </div>
+                        
+                        <hr class="text-white-50 my-3">
+                        
+                        <a class="nav-link" href="/" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Ver Site
+                        </a>
+                        <a class="nav-link" href="/auth/perfil">
+                            <i class="fas fa-user me-2"></i>
+                            Meu Perfil
+                        </a>
+                        
+                        <div class="mt-4">
+                            <form action="/auth/logout" method="POST">
+                                <button type="submit" class="nav-link btn btn-link text-start w-100 border-0 p-0">
+                                    <i class="fas fa-sign-out-alt me-2"></i>
+                                    Sair
+                                </button>
+                            </form>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 px-0">
+                <div class="admin-content p-4">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="text-dark mb-0">Gerenciar Categorias</h2>
+                            <small class="text-muted">Visualize e gerencie todas as categorias de produtos</small>
+                        </div>
+                        <a href="/admin/categorias/nova" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Nova Categoria
+                        </a>
+                    </div>
+
+                    <!-- Flash Messages -->
+                    <% if (typeof success !== 'undefined' && req.session.success) { %>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <%= req.session.success %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <% } %>
+                    <% if (typeof error !== 'undefined' && req.session.error) { %>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <%= req.session.error %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <% } %>
+
+                    <!-- Categories Table -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-tags me-2"></i>
+                                    Lista de Categorias
+                                </h6>
+                                <span class="badge bg-primary">
+                                    <%= categories.length %> categorias encontradas
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <% if (categories && categories.length > 0) { %>
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Categoria</th>
+                                                <th class="text-center" style="width: 100px;">Produtos</th>
+                                                <th class="text-center" style="width: 100px;">Status</th>
+                                                <th class="text-center" style="width: 150px;">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% categories.forEach(category => { %>
+                                                <tr>
+                                                    <!-- Category Info -->
+                                                    <td>
+                                                        <div>
+                                                            <strong><%= category.name %></strong>
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                Slug: <%= category.slug %> 
+                                                                <% if (category.description) { %>
+                                                                    | <%= category.description.substring(0, 50) %><%= category.description.length > 50 ? '...' : '' %>
+                                                                <% } %>
+                                                            </small>
+                                                        </div>
+                                                    </td>
+                                                    
+                                                    <!-- Product Count -->
+                                                    <td class="text-center">
+                                                        <% if (category.product_count > 0) { %>
+                                                            <span class="badge bg-info"><%= category.product_count %></span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-secondary">0</span>
+                                                        <% } %>
+                                                    </td>
+                                                    
+                                                    <!-- Status -->
+                                                    <td class="text-center">
+                                                        <% if (category.active) { %>
+                                                            <span class="badge bg-success">Ativa</span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-secondary">Inativa</span>
+                                                        <% } %>
+                                                    </td>
+                                                    
+                                                    <!-- Actions -->
+                                                    <td class="text-center">
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a href="/produtos?categoria=<%= category.slug %>" 
+                                                               class="btn btn-outline-info" 
+                                                               target="_blank"
+                                                               title="Ver produtos">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+                                                            <a href="/admin/categorias/<%= category.id %>/editar" 
+                                                               class="btn btn-outline-primary"
+                                                               title="Editar">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <% if (category.product_count == 0) { %>
+                                                                <form method="POST" action="/admin/categorias/<%= category.id %>/deletar" 
+                                                                      class="d-inline"
+                                                                      onsubmit="return confirm('Tem certeza que deseja deletar esta categoria?')">
+                                                                    <button type="submit" 
+                                                                            class="btn btn-outline-danger"
+                                                                            title="Deletar">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            <% } else { %>
+                                                                <button class="btn btn-outline-danger" 
+                                                                        disabled
+                                                                        title="Não pode deletar - categoria com produtos">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            <% } %>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <% } else { %>
+                                <!-- No Categories -->
+                                <div class="text-center py-5">
+                                    <i class="fas fa-tags fa-4x text-muted mb-3"></i>
+                                    <h4>Nenhuma categoria encontrada</h4>
+                                    <p class="text-muted">Você ainda não tem categorias cadastradas.</p>
+                                    <a href="/admin/categorias/nova" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>
+                                        Criar Primeira Categoria
+                                    </a>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                if (alert.querySelector('.btn-close')) {
+                    alert.remove();
+                }
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

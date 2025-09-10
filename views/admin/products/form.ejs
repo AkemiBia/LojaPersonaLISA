@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Admin - PersonaLISA' %></title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-sidebar .nav-link:hover,
+        .admin-sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .admin-content {
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .form-check-input:checked {
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+        }
+        
+        .form-switch .form-check-input {
+            width: 2em;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .char-count {
+            display: block;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="admin-sidebar p-3">
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <h4 class="text-white fw-bold">
+                            <i class="fas fa-crown me-2"></i>
+                            PersonaLISA
+                        </h4>
+                        <small class="text-white-50">Painel Administrativo</small>
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="text-center mb-4 p-3 bg-white bg-opacity-10 rounded">
+                        <div class="mb-2">
+                            <i class="fas fa-user-circle fa-3x text-white"></i>
+                        </div>
+                        <h6 class="text-white mb-1"><%= user ? user.name : 'Administrador' %></h6>
+                        <small class="text-white-50">Administrador</small>
+                    </div>
+
+                    <!-- Navigation -->
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="/admin">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        <a class="nav-link active" href="/admin/produtos">
+                            <i class="fas fa-box me-2"></i>
+                            Produtos
+                        </a>
+                        <a class="nav-link" href="/admin/pedidos">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Pedidos
+                        </a>
+                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#categoriesMenu">
+                            <i class="fas fa-tags me-2"></i>
+                            Categorias
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="categoriesMenu">
+                            <a class="nav-link ps-4" href="/admin/categorias">
+                                <i class="fas fa-list me-2"></i>
+                                Listar
+                            </a>
+                            <a class="nav-link ps-4" href="/admin/categorias/nova">
+                                <i class="fas fa-plus me-2"></i>
+                                Nova Categoria
+                            </a>
+                        </div>
+                        
+                        <hr class="text-white-50 my-3">
+                        
+                        <a class="nav-link" href="/" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Ver Site
+                        </a>
+                        <a class="nav-link" href="/auth/perfil">
+                            <i class="fas fa-user me-2"></i>
+                            Meu Perfil
+                        </a>
+                        
+                        <div class="mt-4">
+                            <form action="/auth/logout" method="POST">
+                                <button type="submit" class="nav-link btn btn-link text-start w-100 border-0 p-0">
+                                    <i class="fas fa-sign-out-alt me-2"></i>
+                                    Sair
+                                </button>
+                            </form>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 px-0">
+                <div class="admin-content p-4">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="text-dark mb-0">
+                                <%= isEdit ? 'Editar Produto' : 'Novo Produto' %>
+                            </h2>
+                            <small class="text-muted">
+                                <%= isEdit ? `Editando: ${product.name}` : 'Criar um novo produto na PersonaLISA' %>
+                            </small>
+                        </div>
+                        <a href="/admin/produtos" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Voltar para Lista
+                        </a>
+                    </div>
+
+                    <form action="<%= isEdit ? `/admin/produtos/${product.id}` : '/admin/produtos' %>" 
+                          method="POST" 
+                          class="needs-validation" 
+                          novalidate 
+                          enctype="multipart/form-data">
+                        
+                        <div class="row">
+                            <!-- Main Product Information -->
+                            <div class="col-lg-8">
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Informações Básicas
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Product Name -->
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Nome do Produto *</label>
+                                            <input type="text" class="form-control" id="name" name="name" 
+                                                   value="<%= isEdit ? product.name : '' %>" 
+                                                   required>
+                                            <div class="invalid-feedback">
+                                                O nome do produto é obrigatório
+                                            </div>
+                                        </div>
+
+                                        <!-- Slug -->
+                                        <div class="mb-3">
+                                            <label for="slug" class="form-label">URL Amigável (Slug) *</label>
+                                            <input type="text" class="form-control" id="slug" name="slug" 
+                                                   value="<%= isEdit ? product.slug : '' %>" 
+                                                   required>
+                                            <div class="form-text">Usado na URL do produto. Ex: pelucia-totoro</div>
+                                            <div class="invalid-feedback">
+                                                O slug é obrigatório
+                                            </div>
+                                        </div>
+
+                                        <!-- Description -->
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Descrição</label>
+                                            <textarea class="form-control" id="description" name="description" 
+                                                      rows="4" placeholder="Descreva o produto..."><%= isEdit ? (product.description || '') : '' %></textarea>
+                                            <div class="form-text">Descrição detalhada que aparecerá na página do produto</div>
+                                        </div>
+
+                                        <!-- Price Information -->
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="price" class="form-label">Preço de Venda (R$) *</label>
+                                                <input type="number" class="form-control" id="price" name="price" 
+                                                       step="0.01" min="0"
+                                                       value="<%= isEdit ? product.price : '' %>" 
+                                                       required>
+                                                <div class="invalid-feedback">
+                                                    O preço é obrigatório
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="compare_price" class="form-label">Preço Original (R$)</label>
+                                                <input type="number" class="form-control" id="compare_price" name="compare_price" 
+                                                       step="0.01" min="0"
+                                                       value="<%= isEdit ? (product.compare_price || '') : '' %>">
+                                                <div class="form-text">Para mostrar desconto (deixe vazio se não há desconto)</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- SKU and Stock -->
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="sku" class="form-label">SKU (Código)</label>
+                                                <input type="text" class="form-control" id="sku" name="sku" 
+                                                       value="<%= isEdit ? (product.sku || '') : '' %>"
+                                                       placeholder="Ex: PROD-001">
+                                                <div class="form-text">Código único do produto</div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="stock" class="form-label">Estoque *</label>
+                                                <input type="number" class="form-control" id="stock" name="stock" 
+                                                       min="0"
+                                                       value="<%= isEdit ? product.stock : '' %>" 
+                                                       required>
+                                                <div class="invalid-feedback">
+                                                    A quantidade em estoque é obrigatória
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Weight -->
+                                        <div class="mb-3">
+                                            <label for="weight" class="form-label">Peso (kg)</label>
+                                            <input type="number" class="form-control" id="weight" name="weight" 
+                                                   step="0.001" min="0"
+                                                   value="<%= isEdit ? (product.weight || '') : '' %>"
+                                                   placeholder="0.200">
+                                            <div class="form-text">Peso para cálculo de frete</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SEO Information -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-search me-2"></i>
+                                            Otimização para Buscas (SEO)
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="meta_title" class="form-label">Título SEO</label>
+                                            <input type="text" class="form-control" id="meta_title" name="meta_title" 
+                                                   value="<%= isEdit ? (product.meta_title || '') : '' %>"
+                                                   maxlength="60">
+                                            <div class="form-text">Título que aparece nos resultados de busca (máx. 60 caracteres)</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="meta_description" class="form-label">Descrição SEO</label>
+                                            <textarea class="form-control" id="meta_description" name="meta_description" 
+                                                      rows="3" maxlength="160"><%= isEdit ? (product.meta_description || '') : '' %></textarea>
+                                            <div class="form-text">Descrição que aparece nos resultados de busca (máx. 160 caracteres)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sidebar -->
+                            <div class="col-lg-4">
+                                <!-- Product Status -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-toggle-on me-2"></i>
+                                            Status do Produto
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="active" name="active" 
+                                                   <%= isEdit ? (product.active ? 'checked' : '') : 'checked' %>>
+                                            <label class="form-check-label" for="active">
+                                                Produto Ativo
+                                            </label>
+                                            <div class="form-text">Produtos inativos não aparecem no site</div>
+                                        </div>
+
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="featured" name="featured" 
+                                                   <%= isEdit ? (product.featured ? 'checked' : '') : '' %>>
+                                            <label class="form-check-label" for="featured">
+                                                Produto em Destaque
+                                            </label>
+                                            <div class="form-text">Aparece na seção "Produtos em Destaque"</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Categories -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-tags me-2"></i>
+                                            Categorias
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <% if (categories && categories.length > 0) { %>
+                                            <% categories.forEach(category => { %>
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="checkbox" 
+                                                           id="category_<%= category.id %>" 
+                                                           name="categories" 
+                                                           value="<%= category.id %>"
+                                                           <%= isEdit && selectedCategories && selectedCategories.includes(category.id) ? 'checked' : '' %>>
+                                                    <label class="form-check-label" for="category_<%= category.id %>">
+                                                        <%= category.name %>
+                                                    </label>
+                                                </div>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <p class="text-muted">Nenhuma categoria cadastrada</p>
+                                            <a href="/admin/categorias/nova" class="btn btn-sm btn-outline-primary">
+                                                Criar Categoria
+                                            </a>
+                                        <% } %>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i>
+                                                <%= isEdit ? 'Atualizar Produto' : 'Criar Produto' %>
+                                            </button>
+                                            
+                                            <% if (isEdit) { %>
+                                                <a href="/produtos/<%= product.slug %>" target="_blank" class="btn btn-outline-info">
+                                                    <i class="fas fa-external-link-alt me-2"></i>
+                                                    Ver no Site
+                                                </a>
+                                            <% } %>
+                                            
+                                            <a href="/admin/produtos" class="btn btn-outline-secondary">
+                                                <i class="fas fa-times me-2"></i>
+                                                Cancelar
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-generate slug from name
+        document.getElementById('name').addEventListener('input', function() {
+            const name = this.value;
+            const slug = name
+                .toLowerCase()
+                .replace(/[áàâãä]/g, 'a')
+                .replace(/[éèêë]/g, 'e')
+                .replace(/[íìîï]/g, 'i')
+                .replace(/[óòôõö]/g, 'o')
+                .replace(/[úùûü]/g, 'u')
+                .replace(/[ç]/g, 'c')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim('-');
+            
+            if (!document.getElementById('slug').value || document.getElementById('slug').dataset.autoGenerated) {
+                document.getElementById('slug').value = slug;
+                document.getElementById('slug').dataset.autoGenerated = 'true';
+            }
+        });
+
+        // Mark slug as manually edited
+        document.getElementById('slug').addEventListener('input', function() {
+            if (this.value !== this.defaultValue) {
+                delete this.dataset.autoGenerated;
+            }
+        });
+
+        // Form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                const forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        // Character counters for SEO fields
+        document.getElementById('meta_title').addEventListener('input', function() {
+            const count = this.value.length;
+            const counter = this.parentNode.querySelector('.char-count') || document.createElement('small');
+            counter.className = 'char-count text-muted';
+            counter.textContent = `${count}/60 caracteres`;
+            if (!this.parentNode.querySelector('.char-count')) {
+                this.parentNode.appendChild(counter);
+            }
+            if (count > 60) {
+                counter.className = 'char-count text-danger';
+            }
+        });
+
+        document.getElementById('meta_description').addEventListener('input', function() {
+            const count = this.value.length;
+            const counter = this.parentNode.querySelector('.char-count') || document.createElement('small');
+            counter.className = 'char-count text-muted';
+            counter.textContent = `${count}/160 caracteres`;
+            if (!this.parentNode.querySelector('.char-count')) {
+                this.parentNode.appendChild(counter);
+            }
+            if (count > 160) {
+                counter.className = 'char-count text-danger';
+            }
+        });
+    </script>
+</body>
+</html>

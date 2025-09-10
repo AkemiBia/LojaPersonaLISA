@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Admin - PersonaLISA' %></title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-sidebar .nav-link:hover,
+        .admin-sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .admin-content {
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="admin-sidebar p-3">
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <h4 class="text-white fw-bold">
+                            <i class="fas fa-crown me-2"></i>
+                            PersonaLISA
+                        </h4>
+                        <small class="text-white-50">Painel Administrativo</small>
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="text-center mb-4 p-3 bg-white bg-opacity-10 rounded">
+                        <div class="mb-2">
+                            <i class="fas fa-user-circle fa-3x text-white"></i>
+                        </div>
+                        <h6 class="text-white mb-1"><%= user ? user.name : 'Administrador' %></h6>
+                        <small class="text-white-50">Administrador</small>
+                    </div>
+
+                    <!-- Navigation -->
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="/admin">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        <a class="nav-link" href="/admin/produtos">
+                            <i class="fas fa-box me-2"></i>
+                            Produtos
+                        </a>
+                        <a class="nav-link" href="/admin/pedidos">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Pedidos
+                        </a>
+                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#categoriesMenu">
+                            <i class="fas fa-tags me-2"></i>
+                            Categorias
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse" id="categoriesMenu">
+                            <a class="nav-link ps-4" href="/admin/categorias">
+                                <i class="fas fa-list me-2"></i>
+                                Listar
+                            </a>
+                            <a class="nav-link ps-4" href="/admin/categorias/nova">
+                                <i class="fas fa-plus me-2"></i>
+                                Nova Categoria
+                            </a>
+                        </div>
+                        
+                        <hr class="text-white-50 my-3">
+                        
+                        <a class="nav-link" href="/" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Ver Site
+                        </a>
+                        <a class="nav-link" href="/auth/perfil">
+                            <i class="fas fa-user me-2"></i>
+                            Meu Perfil
+                        </a>
+                        
+                        <div class="mt-4">
+                            <form action="/auth/logout" method="POST">
+                                <button type="submit" class="nav-link btn btn-link text-start w-100 border-0 p-0">
+                                    <i class="fas fa-sign-out-alt me-2"></i>
+                                    Sair
+                                </button>
+                            </form>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 px-0">
+                <div class="admin-content p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="text-dark mb-0">Dashboard</h2>
+                            <small class="text-muted">Gerencie sua loja PersonaLISA</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-primary me-2" onclick="history.back()">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Voltar
+                            </button>
+                            <a href="/" class="btn btn-primary" target="_blank">
+                                <i class="fas fa-external-link-alt me-1"></i>
+                                Ver Site
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Flash Messages -->
+                    <% if (typeof success !== 'undefined' && success) { %>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <%= success %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <% } %>
+                    <% if (typeof error !== 'undefined' && error) { %>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <%= error %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <% } %>
+
+                    <!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="stats-icon bg-primary text-white me-3">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold text-primary"><%= stats.totalProducts %></h3>
+                    <small class="text-muted">Produtos Ativos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="stats-icon bg-success text-white me-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold text-success"><%= stats.totalUsers %></h3>
+                    <small class="text-muted">Usuários Cadastrados</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="stats-icon bg-warning text-white me-3">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold text-warning"><%= stats.totalOrders %></h3>
+                    <small class="text-muted">Pedidos Total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="stats-icon bg-info text-white me-3">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold text-info">R$ <%= parseFloat(stats.totalRevenue).toFixed(2).replace('.', ',') %></h3>
+                    <small class="text-muted">Receita Total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-bolt text-primary me-2"></i>
+                    Ações Rápidas
+                </h5>
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="/admin/produtos/novo" class="btn btn-primary w-100">
+                            <i class="fas fa-plus me-2"></i>
+                            Novo Produto
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/admin/produtos" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-box me-2"></i>
+                            Ver Produtos
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/admin/pedidos" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Ver Pedidos
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/" target="_blank" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Ver Site
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Low Stock Alert -->
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-warning text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Produtos com Estoque Baixo
+                </h6>
+            </div>
+            <div class="card-body">
+                <% if (lowStockProducts && lowStockProducts.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th class="text-center">Estoque</th>
+                                    <th class="text-center">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% lowStockProducts.forEach(product => { %>
+                                    <tr class="<%= product.stock === 0 ? 'table-danger' : product.stock <= 2 ? 'table-warning' : '' %>">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">
+                                                    <% if (product.stock === 0) { %>
+                                                        <i class="fas fa-times-circle text-danger"></i>
+                                                    <% } else { %>
+                                                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                                                    <% } %>
+                                                </div>
+                                                <div>
+                                                    <strong><%= product.name %></strong>
+                                                    <br>
+                                                    <small class="text-muted">SKU: <%= product.sku || 'N/A' %></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge <%= product.stock === 0 ? 'bg-danger' : product.stock <= 2 ? 'bg-warning' : 'bg-secondary' %>">
+                                                <%= product.stock %>
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="/admin/produtos/<%= product.id %>/editar" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <p class="mb-0">Todos os produtos têm estoque adequado!</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Pedidos Recentes
+                </h6>
+            </div>
+            <div class="card-body">
+                <% if (recentOrders && recentOrders.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Pedido</th>
+                                    <th>Cliente</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% recentOrders.forEach(order => { %>
+                                    <tr>
+                                        <td>
+                                            <strong>#<%= order.order_number %></strong>
+                                            <br>
+                                            <small class="text-muted">
+                                                <%= new Date(order.created_at).toLocaleDateString('pt-BR') %>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <%= order.user_name || 'Cliente' %>
+                                        </td>
+                                        <td class="text-center">
+                                            <% 
+                                            let statusClass = 'secondary';
+                                            let statusText = order.status;
+                                            switch(order.status) {
+                                                case 'pending': statusClass = 'warning'; statusText = 'Pendente'; break;
+                                                case 'processing': statusClass = 'info'; statusText = 'Processando'; break;
+                                                case 'shipped': statusClass = 'primary'; statusText = 'Enviado'; break;
+                                                case 'delivered': statusClass = 'success'; statusText = 'Entregue'; break;
+                                                case 'cancelled': statusClass = 'danger'; statusText = 'Cancelado'; break;
+                                            }
+                                            %>
+                                            <span class="badge bg-<%= statusClass %>"><%= statusText %></span>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong>R$ <%= parseFloat(order.total).toFixed(2).replace('.', ',') %></strong>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="/admin/pedidos" class="btn btn-outline-primary btn-sm">
+                            Ver todos os pedidos
+                        </a>
+                    </div>
+                <% } else { %>
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                        <p class="mb-0">Nenhum pedido registrado ainda.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Info -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Informações do Sistema
+                </h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <small class="text-muted">Versão:</small>
+                        <div class="fw-bold">PersonaLISA v1.0.0</div>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Banco de Dados:</small>
+                        <div class="fw-bold text-success">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Conectado
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Último Acesso:</small>
+                        <div class="fw-bold"><%= new Date().toLocaleString('pt-BR') %></div>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Status:</small>
+                        <div class="fw-bold text-success">
+                            <i class="fas fa-circle me-1"></i>
+                            Online
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                if (alert.querySelector('.btn-close')) {
+                    alert.remove();
+                }
+            });
+        }, 5000);
+
+        // Confirm delete actions
+        document.querySelectorAll('[data-confirm]').forEach(element => {
+            element.addEventListener('click', function(e) {
+                if (!confirm(this.dataset.confirm)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

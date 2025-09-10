@@ -1,0 +1,395 @@
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="text-dark mb-0">Gerenciar Pedidos</h2>
+        <small class="text-muted">Visualize e gerencie todos os pedidos da PersonaLISA</small>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="window.location.reload()">
+            <i class="fas fa-sync-alt me-1"></i>
+            Atualizar
+        </button>
+    </div>
+</div>
+
+<!-- Status Filter -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h6 class="mb-2">Filtrar por Status:</h6>
+                <div class="btn-group" role="group">
+                    <a href="/admin/pedidos" 
+                       class="btn <%= selectedStatus === 'all' ? 'btn-primary' : 'btn-outline-primary' %> btn-sm">
+                        Todos
+                    </a>
+                    <a href="/admin/pedidos?status=pending" 
+                       class="btn <%= selectedStatus === 'pending' ? 'btn-warning' : 'btn-outline-warning' %> btn-sm">
+                        Pendentes
+                    </a>
+                    <a href="/admin/pedidos?status=processing" 
+                       class="btn <%= selectedStatus === 'processing' ? 'btn-info' : 'btn-outline-info' %> btn-sm">
+                        Processando
+                    </a>
+                    <a href="/admin/pedidos?status=shipped" 
+                       class="btn <%= selectedStatus === 'shipped' ? 'btn-primary' : 'btn-outline-primary' %> btn-sm">
+                        Enviados
+                    </a>
+                    <a href="/admin/pedidos?status=delivered" 
+                       class="btn <%= selectedStatus === 'delivered' ? 'btn-success' : 'btn-outline-success' %> btn-sm">
+                        Entregues
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <small class="text-muted">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Total de pedidos: <strong><%= orders.length %></strong>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <h6 class="mb-0">
+            <i class="fas fa-shopping-cart me-2"></i>
+            Lista de Pedidos
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <% if (orders && orders.length > 0) { %>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Pedido</th>
+                            <th>Cliente</th>
+                            <th class="text-center">Data</th>
+                            <th class="text-center">Itens</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Pagamento</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order => { %>
+                            <tr>
+                                <!-- Order Number -->
+                                <td>
+                                    <div>
+                                        <strong>#<%= order.order_number %></strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            ID: <%= order.id %>
+                                        </small>
+                                    </div>
+                                </td>
+                                
+                                <!-- Customer -->
+                                <td>
+                                    <div>
+                                        <strong><%= order.user_name || 'Cliente Visitante' %></strong>
+                                        <% if (order.user_email) { %>
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="fas fa-envelope me-1"></i>
+                                                <%= order.user_email %>
+                                            </small>
+                                        <% } %>
+                                    </div>
+                                </td>
+                                
+                                <!-- Date -->
+                                <td class="text-center">
+                                    <div>
+                                        <%= new Date(order.created_at).toLocaleDateString('pt-BR') %>
+                                        <br>
+                                        <small class="text-muted">
+                                            <%= new Date(order.created_at).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'}) %>
+                                        </small>
+                                    </div>
+                                </td>
+                                
+                                <!-- Items Count -->
+                                <td class="text-center">
+                                    <span class="badge bg-secondary">
+                                        <%= order.items_count %> <%= order.items_count === 1 ? 'item' : 'itens' %>
+                                    </span>
+                                </td>
+                                
+                                <!-- Status -->
+                                <td class="text-center">
+                                    <% 
+                                    let statusClass = 'secondary';
+                                    let statusText = order.status;
+                                    let statusIcon = 'fas fa-circle';
+                                    
+                                    switch(order.status) {
+                                        case 'pending': 
+                                            statusClass = 'warning'; 
+                                            statusText = 'Pendente'; 
+                                            statusIcon = 'fas fa-clock';
+                                            break;
+                                        case 'processing': 
+                                            statusClass = 'info'; 
+                                            statusText = 'Processando'; 
+                                            statusIcon = 'fas fa-cog fa-spin';
+                                            break;
+                                        case 'shipped': 
+                                            statusClass = 'primary'; 
+                                            statusText = 'Enviado'; 
+                                            statusIcon = 'fas fa-shipping-fast';
+                                            break;
+                                        case 'delivered': 
+                                            statusClass = 'success'; 
+                                            statusText = 'Entregue'; 
+                                            statusIcon = 'fas fa-check-circle';
+                                            break;
+                                        case 'cancelled': 
+                                            statusClass = 'danger'; 
+                                            statusText = 'Cancelado'; 
+                                            statusIcon = 'fas fa-times-circle';
+                                            break;
+                                    }
+                                    %>
+                                    <span class="badge bg-<%= statusClass %>">
+                                        <i class="<%= statusIcon %> me-1"></i>
+                                        <%= statusText %>
+                                    </span>
+                                </td>
+                                
+                                <!-- Payment Status -->
+                                <td class="text-center">
+                                    <% 
+                                    let paymentClass = 'secondary';
+                                    let paymentText = order.payment_status;
+                                    
+                                    switch(order.payment_status) {
+                                        case 'pending': 
+                                            paymentClass = 'warning'; 
+                                            paymentText = 'Pendente'; 
+                                            break;
+                                        case 'paid': 
+                                            paymentClass = 'success'; 
+                                            paymentText = 'Pago'; 
+                                            break;
+                                        case 'failed': 
+                                            paymentClass = 'danger'; 
+                                            paymentText = 'Falhou'; 
+                                            break;
+                                        case 'refunded': 
+                                            paymentClass = 'info'; 
+                                            paymentText = 'Reembolsado'; 
+                                            break;
+                                    }
+                                    %>
+                                    <small class="badge bg-<%= paymentClass %>">
+                                        <%= paymentText %>
+                                    </small>
+                                    <% if (order.payment_method) { %>
+                                        <br>
+                                        <small class="text-muted">
+                                            <%= order.payment_method.toUpperCase() %>
+                                        </small>
+                                    <% } %>
+                                </td>
+                                
+                                <!-- Total -->
+                                <td class="text-end">
+                                    <strong>R$ <%= parseFloat(order.total).toFixed(2).replace('.', ',') %></strong>
+                                    <% if (order.shipping_cost > 0) { %>
+                                        <br>
+                                        <small class="text-muted">
+                                            + R$ <%= parseFloat(order.shipping_cost).toFixed(2).replace('.', ',') %> frete
+                                        </small>
+                                    <% } %>
+                                </td>
+                                
+                                <!-- Actions -->
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/admin/pedidos/<%= order.id %>" 
+                                           class="btn btn-outline-primary"
+                                           title="Ver detalhes">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline-secondary dropdown-toggle" 
+                                                    type="button" 
+                                                    data-bs-toggle="dropdown"
+                                                    title="Alterar status">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <form method="POST" action="/admin/pedidos/<%= order.id %>/status" class="d-inline">
+                                                        <input type="hidden" name="status" value="pending">
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="fas fa-clock text-warning me-2"></i>
+                                                            Pendente
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li>
+                                                    <form method="POST" action="/admin/pedidos/<%= order.id %>/status" class="d-inline">
+                                                        <input type="hidden" name="status" value="processing">
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="fas fa-cog text-info me-2"></i>
+                                                            Processando
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li>
+                                                    <form method="POST" action="/admin/pedidos/<%= order.id %>/status" class="d-inline">
+                                                        <input type="hidden" name="status" value="shipped">
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="fas fa-shipping-fast text-primary me-2"></i>
+                                                            Enviado
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li>
+                                                    <form method="POST" action="/admin/pedidos/<%= order.id %>/status" class="d-inline">
+                                                        <input type="hidden" name="status" value="delivered">
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                                            Entregue
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <form method="POST" action="/admin/pedidos/<%= order.id %>/status" class="d-inline">
+                                                        <input type="hidden" name="status" value="cancelled">
+                                                        <button type="submit" class="dropdown-item text-danger"
+                                                                onclick="return confirm('Tem certeza que deseja cancelar este pedido?')">
+                                                            <i class="fas fa-times-circle me-2"></i>
+                                                            Cancelar
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <% if (pagination && pagination.total > 1) { %>
+                <div class="card-footer bg-white">
+                    <nav aria-label="Paginação de pedidos">
+                        <ul class="pagination justify-content-center mb-0">
+                            <% if (pagination.hasPrev) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= pagination.prev %>&status=<%= selectedStatus %>">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            <% } %>
+
+                            <% for (let i = Math.max(1, pagination.current - 2); i <= Math.min(pagination.total, pagination.current + 2); i++) { %>
+                                <li class="page-item <%= i === pagination.current ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>&status=<%= selectedStatus %>"><%= i %></a>
+                                </li>
+                            <% } %>
+
+                            <% if (pagination.hasNext) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= pagination.next %>&status=<%= selectedStatus %>">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                </div>
+            <% } %>
+
+        <% } else { %>
+            <!-- No Orders -->
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                <h4>Nenhum pedido encontrado</h4>
+                <p class="text-muted">
+                    <% if (selectedStatus && selectedStatus !== 'all') { %>
+                        Não há pedidos com status "<%= selectedStatus %>" no momento.
+                    <% } else { %>
+                        Ainda não há pedidos registrados no sistema.
+                    <% } %>
+                </p>
+                <a href="/admin" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Voltar ao Dashboard
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+// Auto-refresh every 30 seconds for new orders
+setInterval(() => {
+    // Only auto-refresh if we're on the first page and showing all/pending orders
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get('page') || '1';
+    const status = urlParams.get('status') || 'all';
+    
+    if (page === '1' && (status === 'all' || status === 'pending')) {
+        // Show a subtle notification
+        console.log('Auto-refreshing orders...');
+        
+        // You could implement a subtle refresh here
+        // window.location.reload();
+    }
+}, 30000);
+
+// Add confirmation for status changes
+document.querySelectorAll('form[action*="/status"] button').forEach(button => {
+    if (!button.onclick) {
+        button.addEventListener('click', function(e) {
+            if (!confirm('Tem certeza que deseja alterar o status deste pedido?')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+
+<style>
+.table td {
+    vertical-align: middle;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.dropdown-item {
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.fa-spin {
+    animation: fa-spin 2s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>

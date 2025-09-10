@@ -1,0 +1,235 @@
+<div class="container my-5">
+    <!-- Page Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold text-primary mb-3">Dúvidas Frequentes</h1>
+            <p class="lead text-muted">Respostas para as perguntas mais comuns sobre nossos produtos e serviços</p>
+        </div>
+    </div>
+
+    <!-- Search FAQ -->
+    <div class="row mb-5">
+        <div class="col-lg-6 mx-auto">
+            <div class="input-group">
+                <input type="text" class="form-control form-control-lg" id="searchFAQ" 
+                       placeholder="Buscar nas dúvidas frequentes...">
+                <button class="btn btn-primary" type="button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <!-- FAQ Accordion -->
+            <div class="accordion" id="faqAccordion">
+                <% faqs.forEach((faq, index) => { %>
+                    <div class="accordion-item faq-item" data-keywords="<%= faq.question.toLowerCase() %> <%= faq.answer.toLowerCase() %>">
+                        <h2 class="accordion-header" id="heading<%= index %>">
+                            <button class="accordion-button <%= index !== 0 ? 'collapsed' : '' %>" 
+                                    type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse<%= index %>" 
+                                    aria-expanded="<%= index === 0 ? 'true' : 'false' %>" 
+                                    aria-controls="collapse<%= index %>">
+                                <i class="fas fa-question-circle text-primary me-3"></i>
+                                <%= faq.question %>
+                            </button>
+                        </h2>
+                        <div id="collapse<%= index %>" 
+                             class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" 
+                             aria-labelledby="heading<%= index %>" 
+                             data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-check-circle text-success fa-lg"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <%= faq.answer %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+
+            <!-- No results message -->
+            <div id="noResults" class="text-center py-5" style="display: none;">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>Nenhuma dúvida encontrada</h4>
+                <p class="text-muted">Tente outros termos de busca ou entre em contato conosco</p>
+                <a href="/contato" class="btn btn-primary">
+                    <i class="fas fa-envelope me-2"></i>Fale conosco
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 bg-gradient-purple text-white">
+                <div class="card-body text-center py-5">
+                    <h3 class="mb-3">Não encontrou sua dúvida?</h3>
+                    <p class="mb-4">Nossa equipe está pronta para ajudar você com qualquer questão!</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-grid">
+                                <a href="https://wa.me/5511958700905" class="btn btn-light btn-lg">
+                                    <i class="fab fa-whatsapp text-success me-2"></i>
+                                    WhatsApp
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-grid">
+                                <a href="/contato" class="btn btn-outline-light btn-lg">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    Formulário de Contato
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4 class="text-center mb-4">Links Úteis</h4>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="card border-0 bg-light text-center">
+                        <div class="card-body">
+                            <i class="fas fa-shipping-fast fa-2x text-primary mb-2"></i>
+                            <h6>Prazos de Entrega</h6>
+                            <small class="text-muted">Consulte os prazos para sua região</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card border-0 bg-light text-center">
+                        <div class="card-body">
+                            <i class="fas fa-credit-card fa-2x text-primary mb-2"></i>
+                            <h6>Formas de Pagamento</h6>
+                            <small class="text-muted">PIX, cartão de crédito e boleto</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card border-0 bg-light text-center">
+                        <div class="card-body">
+                            <i class="fas fa-book fa-2x text-primary mb-2"></i>
+                            <h6>Receitas de Crochê</h6>
+                            <small class="text-muted">Aprenda a fazer suas próprias pelúcias</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card border-0 bg-light text-center">
+                        <div class="card-body">
+                            <i class="fas fa-heart fa-2x text-primary mb-2"></i>
+                            <h6>Produtos Personalizados</h6>
+                            <small class="text-muted">Encomende sua pelúcia única</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// FAQ Search functionality
+document.getElementById('searchFAQ').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const faqItems = document.querySelectorAll('.faq-item');
+    const noResults = document.getElementById('noResults');
+    let hasResults = false;
+
+    faqItems.forEach(item => {
+        const keywords = item.dataset.keywords;
+        if (keywords.includes(searchTerm)) {
+            item.style.display = 'block';
+            hasResults = true;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+
+    // Show/hide no results message
+    if (hasResults || searchTerm === '') {
+        noResults.style.display = 'none';
+    } else {
+        noResults.style.display = 'block';
+    }
+});
+
+// Smooth scroll to FAQ item if accessed via URL hash
+window.addEventListener('load', function() {
+    if (window.location.hash) {
+        const target = document.querySelector(window.location.hash);
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+});
+</script>
+
+<style>
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.accordion-button {
+    font-weight: 500;
+    padding: 1.25rem 1.5rem;
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--primary-color);
+    background-color: rgba(111, 66, 193, 0.1);
+    border-color: var(--primary-color);
+}
+
+.accordion-button:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
+
+.accordion-item {
+    border: 1px solid #dee2e6;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+}
+
+.accordion-body {
+    background-color: #f8f9fa;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
+
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2.5rem;
+    }
+    
+    .accordion-button {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+}
+</style>

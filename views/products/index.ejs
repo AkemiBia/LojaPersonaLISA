@@ -1,0 +1,203 @@
+
+<div class="container my-5">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Início</a></li>
+                    <% if (currentCategory) { %>
+                        <li class="breadcrumb-item active"><%= currentCategory.name %></li>
+                    <% } else { %>
+                        <li class="breadcrumb-item active">Produtos</li>
+                    <% } %>
+                </ol>
+            </nav>
+            
+            <h1 class="mb-3">
+                <%= currentCategory ? currentCategory.name : 'Todos os Produtos' %>
+            </h1>
+            
+            <% if (currentCategory && currentCategory.description) { %>
+                <p class="text-muted lead"><%= currentCategory.description %></p>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Categories -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold">Categorias</h6>
+                        <div class="list-group list-group-flush">
+                            <a href="/produtos" 
+                               class="list-group-item list-group-item-action <%= !filters.category ? 'active' : '' %>">
+                                Todos os produtos
+                                <span class="badge bg-secondary rounded-pill float-end">
+                                    <%= resultsCount %>
+                                </span>
+                            </a>
+                            <% categories.forEach(category => { %>
+                                <a href="/produtos?categoria=<%= category.slug %>" 
+                                   class="list-group-item list-group-item-action <%= filters.category === category.slug ? 'active' : '' %>">
+                                    <%= category.name %>
+                                    <span class="badge bg-secondary rounded-pill float-end">
+                                        <%= category.product_count %>
+                                    </span>
+                                </a>
+                            <% }) %>
+                        </div>
+                    </div>
+
+                    <!-- Sort Options -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold">Ordenar por</h6>
+                        <select class="form-select" id="sortSelect">
+                            <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Mais recentes</option>
+                            <option value="featured" <%= filters.sort === 'featured' ? 'selected' : '' %>>Em destaque</option>
+                            <option value="price_asc" <%= filters.sort === 'price_asc' ? 'selected' : '' %>>Menor preço</option>
+                            <option value="price_desc" <%= filters.sort === 'price_desc' ? 'selected' : '' %>>Maior preço</option>
+                            <option value="name_asc" <%= filters.sort === 'name_asc' ? 'selected' : '' %>>A-Z</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="col-lg-9">
+            <!-- Results Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <p class="text-muted mb-0">
+                    Mostrando <%= products.length %> de <%= resultsCount %> produtos
+                </p>
+                
+                <!-- Mobile sort -->
+                <div class="d-lg-none">
+                    <select class="form-select form-select-sm" id="mobileSortSelect">
+                        <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Mais recentes</option>
+                        <option value="featured" <%= filters.sort === 'featured' ? 'selected' : '' %>>Em destaque</option>
+                        <option value="price_asc" <%= filters.sort === 'price_asc' ? 'selected' : '' %>>Menor preço</option>
+                        <option value="price_desc" <%= filters.sort === 'price_desc' ? 'selected' : '' %>>Maior preço</option>
+                        <option value="name_asc" <%= filters.sort === 'name_asc' ? 'selected' : '' %>>A-Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Products -->
+            <% if (products && products.length > 0) { %>
+                <div class="row">
+                    <% products.forEach(product => { %>
+                        <div class="col-lg-4 col-md-6 col-sm-6 mb-4">
+                            <%- include('../partials/product-card', { product: product }) %>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <!-- Pagination -->
+                <% if (pagination.total > 1) { %>
+                    <nav aria-label="Navegação de páginas" class="mt-5">
+                        <ul class="pagination justify-content-center">
+                            <% if (pagination.hasPrev) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= pagination.prev %>&categoria=<%= filters.category || '' %>&sort=<%= filters.sort || '' %>">
+                                        <i class="fas fa-chevron-left"></i> Anterior
+                                    </a>
+                                </li>
+                            <% } %>
+
+                            <% for (let i = Math.max(1, pagination.current - 2); i <= Math.min(pagination.total, pagination.current + 2); i++) { %>
+                                <li class="page-item <%= i === pagination.current ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>&categoria=<%= filters.category || '' %>&sort=<%= filters.sort || '' %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
+                            <% } %>
+
+                            <% if (pagination.hasNext) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= pagination.next %>&categoria=<%= filters.category || '' %>&sort=<%= filters.sort || '' %>">
+                                        Próximo <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                <% } %>
+
+            <% } else { %>
+                <!-- No products found -->
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                    <h3>Nenhum produto encontrado</h3>
+                    <p class="text-muted">
+                        Não encontramos produtos 
+                        <% if (currentCategory) { %>
+                            na categoria "<%= currentCategory.name %>"
+                        <% } else { %>
+                            com os filtros selecionados
+                        <% } %>
+                    </p>
+                    <a href="/produtos" class="btn btn-primary">Ver todos os produtos</a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handle sort changes
+document.getElementById('sortSelect')?.addEventListener('change', function() {
+    const url = new URL(window.location);
+    url.searchParams.set('sort', this.value);
+    url.searchParams.set('page', '1'); // Reset to first page
+    window.location.href = url.toString();
+});
+
+document.getElementById('mobileSortSelect')?.addEventListener('change', function() {
+    const url = new URL(window.location);
+    url.searchParams.set('sort', this.value);
+    url.searchParams.set('page', '1'); // Reset to first page
+    window.location.href = url.toString();
+});
+
+// Mobile filter toggle
+function toggleMobileFilters() {
+    const sidebar = document.querySelector('.col-lg-3');
+    sidebar.classList.toggle('d-none');
+}
+</script>
+
+<style>
+.breadcrumb {
+    background: none;
+    padding: 0;
+}
+
+.list-group-item.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.card-header {
+    background: var(--light-color);
+    border-bottom: 1px solid #dee2e6;
+}
+
+@media (max-width: 991px) {
+    .col-lg-3 {
+        order: 2;
+        margin-top: 2rem;
+    }
+    
+    .col-lg-9 {
+        order: 1;
+    }
+}
+</style>

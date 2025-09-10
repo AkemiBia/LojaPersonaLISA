@@ -1,0 +1,323 @@
+
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-purple text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Bem-vindo à PersonaLISA!
+                </h1>
+                <p class="lead mb-4">
+                    Produtos únicos K-pop, anime e cultura pop, feitos com muito amor e carinho. 
+                    TWICE, Pokémon, Studio Ghibli, BLACKPINK, Stray Kids e muito mais!
+                </p>
+                <div class="hero-badges mb-4">
+                    <span class="badge bg-light text-dark me-2">
+                        <i class="fas fa-truck"></i> Frete grátis comprando 2 ou mais
+                    </span>
+                    <span class="badge bg-warning text-dark">
+                        <i class="fas fa-percentage"></i> Desconto em todos os produtos
+                    </span>
+                </div>
+                <a href="/produtos" class="btn btn-light btn-lg">
+                    Ver Produtos <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center">
+                    <!-- Placeholder para futura imagem do banner -->
+                    <div class="hero-placeholder">
+                        <i class="fas fa-star fa-5x text-white mb-3" style="opacity: 0.3;"></i>
+                        <h3 class="text-white" style="opacity: 0.3;">PersonaLISA</h3>
+                        <p class="text-white" style="opacity: 0.2;">K-pop & Anime Store</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Produtos TWICE ♡ -->
+<% if (chaveiros && chaveiros.length > 0) { %>
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2 class="section-title">
+                <i class="fas fa-music me-2 text-primary"></i>
+                Produtos TWICE ♡
+            </h2>
+            <a href="/produtos?categoria=twice" class="btn btn-outline-primary">Ver todos</a>
+        </div>
+        
+        <div class="row">
+            <% chaveiros.forEach(product => { %>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <%- include('partials/product-card', { product: product }) %>
+                </div>
+            <% }) %>
+        </div>
+        
+        <div class="text-center mt-4">
+            <p class="text-muted">
+                <i class="fas fa-heart text-danger me-1"></i>
+                Camisetas oficiais e produtos únicos inspirados no TWICE para Once apaixonadas!
+            </p>
+        </div>
+    </div>
+</section>
+<% } %>
+
+<!-- Novidades! ♡ -->
+<% if (newProducts && newProducts.length > 0) { %>
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2 class="section-title">Novidades! ♡</h2>
+            <a href="/produtos?sort=newest" class="btn btn-outline-primary">Ver todas</a>
+        </div>
+        
+        <div class="row">
+            <% newProducts.forEach(product => { %>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <%- include('partials/product-card', { product: product }) %>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</section>
+<% } %>
+
+<!-- Mais Vendidos ♡ -->
+<% if (bestSellers && bestSellers.length > 0) { %>
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2 class="section-title">Mais Vendidos ♡</h2>
+            <a href="/produtos?sort=featured" class="btn btn-outline-primary">Ver todos</a>
+        </div>
+        
+        <div class="row">
+            <% bestSellers.forEach(product => { %>
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <%- include('partials/product-card', { product: product }) %>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</section>
+<% } %>
+
+<!-- K-pop Collection! -->
+<% if (receitas && receitas.length > 0) { %>
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2 class="section-title">
+                <i class="fas fa-star me-2 text-warning"></i>
+                Coleção K-pop!
+            </h2>
+            <a href="/produtos" class="btn btn-outline-primary">Ver todos</a>
+        </div>
+        
+        <p class="text-muted mb-4">
+            <i class="fas fa-heart text-danger me-1"></i>
+            Produtos inspirados nos seus grupos favoritos: TWICE, BLACKPINK e Stray Kids!
+        </p>
+        
+        <div class="row">
+            <% receitas.forEach(product => { %>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <%- include('partials/product-card', { product: product }) %>
+                </div>
+            <% }) %>
+        </div>
+        
+        <div class="text-center mt-4">
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/produtos?categoria=twice" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-music me-1"></i>TWICE
+                </a>
+                <a href="/produtos?categoria=blackpink" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-crown me-1"></i>BLACKPINK
+                </a>
+                <a href="/produtos?categoria=skz" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-star me-1"></i>Stray Kids
+                </a>
+                <a href="/produtos?categoria=pokemon" class="btn btn-outline-warning btn-sm">
+                    <i class="fas fa-paw me-1"></i>Pokémon
+                </a>
+                <a href="/produtos?categoria=ghibli" class="btn btn-outline-success btn-sm">
+                    <i class="fas fa-magic me-1"></i>Ghibli
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<% } %>
+
+<!-- Features -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-shipping-fast fa-3x mb-3"></i>
+                    <h4>Envio para todo Brasil</h4>
+                    <p>Entregamos em todo território nacional com os melhores prazos</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-credit-card fa-3x mb-3"></i>
+                    <h4>Pagamentos seguros</h4>
+                    <p>PIX (com desconto), cartão de crédito e boleto bancário</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-heart fa-3x mb-3"></i>
+                    <h4>Feito com amor</h4>
+                    <p>Cada produto é único e feito artesanalmente com muito carinho</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h3 class="mb-3">Fique por dentro das novidades!</h3>
+                <p class="text-muted mb-4">
+                    Receba em primeira mão sobre lançamentos, promoções e produtos exclusivos K-pop!
+                </p>
+                <form class="row g-2 justify-content-center" action="/newsletter" method="POST">
+                    <div class="col-auto">
+                        <input type="email" class="form-control" placeholder="Seu melhor email" name="email" required>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Inscrever
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories grid (mobile) -->
+<section class="py-5 bg-light d-md-none">
+    <div class="container">
+        <h3 class="text-center mb-4">Categorias</h3>
+        <div class="row">
+            <div class="col-6 mb-3">
+                <a href="/produtos?categoria=twice" class="category-card d-block text-decoration-none">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-music fa-2x text-primary mb-2"></i>
+                            <h6 class="card-title mb-0">TWICE</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 mb-3">
+                <a href="/produtos?categoria=pokemon" class="category-card d-block text-decoration-none">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-paw fa-2x text-warning mb-2"></i>
+                            <h6 class="card-title mb-0">Pokémon</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 mb-3">
+                <a href="/produtos?categoria=ghibli" class="category-card d-block text-decoration-none">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-magic fa-2x text-success mb-2"></i>
+                            <h6 class="card-title mb-0">Studio Ghibli</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 mb-3">
+                <a href="/produtos?categoria=blackpink" class="category-card d-block text-decoration-none">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-crown fa-2x text-danger mb-2"></i>
+                            <h6 class="card-title mb-0">BLACKPINK</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 mb-3">
+                <a href="/produtos?categoria=skz" class="category-card d-block text-decoration-none">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-star fa-2x text-info mb-2"></i>
+                            <h6 class="card-title mb-0">Stray Kids</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 500px;
+}
+
+.section-title {
+    color: #6f42c1;
+    font-weight: 600;
+}
+
+.feature-card {
+    padding: 2rem 1rem;
+}
+
+.category-card:hover .card {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+}
+
+.hero-image img {
+    max-height: 400px;
+    object-fit: contain;
+}
+
+.hero-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    padding: 2rem;
+}
+
+.hero-badges .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 400px;
+        text-align: center;
+    }
+    
+    .hero-image {
+        margin-top: 2rem;
+    }
+    
+    .hero-image img {
+        max-height: 250px;
+    }
+}
+</style>

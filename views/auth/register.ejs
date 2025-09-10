@@ -1,0 +1,160 @@
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">Cadastre-se</h2>
+                        <p class="text-muted">Crie sua conta PersonaLISA</p>
+                    </div>
+
+                    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                <% errors.forEach(error => { %>
+                                    <li><%= error.msg %></li>
+                                <% }) %>
+                            </ul>
+                        </div>
+                    <% } %>
+
+                    <form action="/auth/cadastro" method="POST" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nome completo</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="<%= typeof formData !== 'undefined' ? formData.name : '' %>" 
+                                   minlength="2" maxlength="50" required>
+                            <div class="invalid-feedback">
+                                Digite seu nome completo (2-50 caracteres)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="<%= typeof formData !== 'undefined' ? formData.email : '' %>" required>
+                            <div class="invalid-feedback">
+                                Digite um email válido
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Telefone <small class="text-muted">(opcional)</small></label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   placeholder="(11) 99999-9999"
+                                   value="<%= typeof formData !== 'undefined' ? formData.phone : '' %>">
+                            <div class="invalid-feedback">
+                                Digite um telefone válido: (11) 99999-9999
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   minlength="6" required>
+                            <div class="invalid-feedback">
+                                A senha deve ter pelo menos 6 caracteres
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirmar senha</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
+                                   minlength="6" required>
+                            <div class="invalid-feedback">
+                                As senhas devem ser iguais
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                Aceito os <a href="#" class="text-primary">termos de uso</a> e 
+                                <a href="#" class="text-primary">política de privacidade</a>
+                            </label>
+                            <div class="invalid-feedback">
+                                Você deve aceitar os termos para continuar
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Criar conta
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="text-muted mb-2">Já tem uma conta?</p>
+                        <a href="/auth/login" class="btn btn-outline-primary">
+                            Fazer login
+                        </a>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Cadastro 100% gratuito e seguro
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validação personalizada para confirmação de senha
+document.getElementById('confirmPassword').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    
+    if (password !== confirmPassword) {
+        this.setCustomValidity('As senhas não conferem');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+
+// Máscara para telefone
+document.getElementById('phone').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 10) {
+        if (value.length === 10) {
+            value = '(' + value.substring(0, 2) + ') ' + value.substring(2, 6) + '-' + value.substring(6, 10);
+        } else {
+            value = '(' + value.substring(0, 2) + ') ' + value.substring(2, 7) + '-' + value.substring(7, 11);
+        }
+    }
+    e.target.value = value;
+});
+</script>
+
+<style>
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
+
+.btn-primary {
+    background: var(--gradient-purple);
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+</style>

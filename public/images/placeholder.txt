@@ -1,0 +1,25 @@
+# Pasta de Imagens da PersonaLISA
+
+Esta pasta contém todas as imagens do site PersonaLISA:
+
+## Estrutura de pastas:
+- `/products/` - Imagens dos produtos
+- `/categories/` - Imagens das categorias  
+- `/banners/` - Banners promocionais
+- `/icons/` - Ícones e logos
+
+## Formatos recomendados:
+- Produtos: 800x800px, formato JPG ou WebP
+- Logos: SVG ou PNG com fundo transparente
+- Banners: 1200x400px para desktop, 800x600px para mobile
+
+## Nomenclatura:
+- Produtos: `produto-slug-1.jpg`, `produto-slug-2.jpg`
+- Logos: `logolisa.jpg`, `logo-light.png`
+- Favicons: `favicon.ico`, `apple-touch-icon.png`
+
+Para adicionar imagens reais:
+1. Substitua este arquivo por imagens reais
+2. Mantenha a estrutura de pastas
+3. Use nomes descritivos
+4. Otimize as imagens para web
